@@ -7,7 +7,7 @@ if(isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $model = $_POST['model'];
     $price = $_POST['price'];
 
-    $imageName= $_FILES['image']['name'];
+    $imageName = $_FILES['image']['name'];
     $imageTemp = $_FILES['image']['tmp_name'];
     $imagePath = "assets/" . $imageName;
 
@@ -16,25 +16,62 @@ if(isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     }
 
     if (move_uploaded_file($imageTemp, $imagePath)) {
+        require_once 'connection.php';
 
-        $sql = "INSERT INTO carsPDO (brand, model, price, image) VALUES (:brand, :model, :price, :image)";
+        // Drop procedure addCar if exists
+        $sql1 = "DROP PROCEDURE IF EXISTS addCar";
+        $stmt1 = $con->prepare($sql1);
+        $stmt1->execute();
+
+        // Create procedure addCar and use it
+        $sql2 = "CREATE PROCEDURE addCar(
+            IN Brand VARCHAR(255),
+            IN Model VARCHAR(255),
+            IN Price DECIMAL(10, 2),
+            IN Image VARCHAR(255)
+        )
+        BEGIN
+            INSERT INTO cars (brand, model, price, image) VALUES (Brand, Model, Price, Image);
+        END";
+        $stmt2 = $con->prepare($sql2);
+        $stmt2->execute();
+
+        // Drop trigger afterAddCar if exists
+        $sql3 = "DROP TRIGGER IF EXISTS afterAddCar";
+        $stmt3 = $con->prepare($sql3);
+        $stmt3->execute();
+
+        // Create trigger afterAddCar
+        $sql4 = "CREATE TRIGGER afterAddCar
+                 AFTER INSERT ON cars
+                 FOR EACH ROW
+                 BEGIN
+                     INSERT INTO cars_logs (
+                         car_id, old_brand, new_brand, old_model, new_model, old_price, new_price, cars_timestamp
+                     ) VALUES (
+                         NEW.id, NEW.brand, NEW.brand, NEW.model, NEW.model, NEW.price, NEW.price, NOW()
+                     );
+                 END";
+        $stmt4 = $con->prepare($sql4);
+        $stmt4->execute();
+
+        // Call procedure addCar
+        $sql = "CALL addCar(:Brand, :Model, :Price, :Image)";
         $stmt = $con->prepare($sql);
-        $stmt->bindParam(':brand', $brand, PDO::PARAM_STR);
-        $stmt->bindParam(':model', $model, PDO::PARAM_STR);
-        $stmt->bindParam(':price', $price, PDO::PARAM_INT);
-        $stmt->bindParam(':image', $imageName, PDO::PARAM_STR);
+        $stmt->bindParam(':Brand', $brand, PDO::PARAM_STR);
+        $stmt->bindParam(':Model', $model, PDO::PARAM_STR);
+        $stmt->bindParam(':Price', $price, PDO::PARAM_STR);
+        $stmt->bindParam(':Image', $imageName, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
-            //echo "Masina adaugata cu succes!<br> <a href='index.php'>Toate masinile</a>";
             header('Location: index.php');
             exit();
         } else {
-            echo "Eroare la adaugat masina.";
+            echo "Error adding the car.";
         }
     } else {
-        echo "Eroare imagine";
+        echo "Error uploading the image.";
     }
-
 }
 ?>
 
@@ -42,7 +79,7 @@ if(isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta brand="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add a car</title>
     <link href="css/styles.css" rel="stylesheet">
 </head>
@@ -69,7 +106,7 @@ if(isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
-    <a href="index.php" class="back-button">Inapoi</a>
+    <a href="index.php" class="back-button">Back</a>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

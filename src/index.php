@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Expozitie de masini</title>
+    <title>Cars Exposition</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <!-- Core theme CSS (includes Bootstrap)-->
@@ -15,7 +15,7 @@
     <!-- Responsive navbar-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container px-5">
-            <a class="navbar-brand" href="#!">Expozitie de masini</a>
+            <a class="navbar-brand" href="#!">Cars Exposition</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -34,28 +34,25 @@
             </div>
             <!-- Content Row-->
             <div class="row gx-4 gx-lg-5">
+                <!-- Show the current cars -->
                 <?php
-                
                 require_once 'connection.php';
-
-                $sql = "SELECT * FROM carsPDO";
+                $sql = "SELECT * FROM cars";
                 $result = $con->query($sql);
-
-                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                while ($car = $result->fetch(PDO::FETCH_ASSOC)) {
                     echo '<div class="col-md-4 mb-5">';
                         echo '<div class="card h-100">';
                             echo '<div class="card-body">';
-                                echo '<h2 class="card-title">' . $row['brand'] . '</h2>';
-                                echo '<p class="card-text">Model: ' .$row['model'] .'';
-                                echo '<br>Price: ' .$row['price'] .'</p>';
-                                echo '<img height="300" width="300" src="assets/' . $row['image'] . '" onerror="this.onerror=null; this.src=\'assets/404.jpg\'" alt="The image does not exist">';
+                                echo '<h2 class="card-title">' . $car['brand'] . '</h2>';
+                                echo '<p class="card-text">Model: ' .$car['model'] .'';
+                                echo '<br>Price: ' .$car['price'] .'</p>';
+                                echo '<img height="300" width="300" src="assets/' . $car['image'] . '" onerror="this.onerror=null; this.src=\'assets/404.jpg\'" alt="The image does not exist">';
                             echo '</div>';
-                            echo '<div class="card-footer"><a class="btn btn-primary btn-sm" href="edit.php?id='.$row['id'] . '">Edit</a></div>';
-                            echo '<div class="card-footer"><a class="btn btn-primary btn-sm" href="delete.php?id='.$row['id'] . '">Delete</a></div>';
-                            echo '</div>';
+                            echo '<div class="card-footer"><a class="btn btn-primary btn-sm" href="edit.php?id='.$car['id'] . '">Edit</a></div>';
+                            echo '<div class="card-footer"><a class="btn btn-primary btn-sm" href="delete.php?id='.$car['id'] . '">Delete</a></div>';
+                        echo '</div>';
                     echo '</div>';
-                } 
-                
+                }
                 ?>
             </div>
         </div>
