@@ -23,7 +23,7 @@ if(isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $stmt1 = $con->prepare($sql1);
         $stmt1->execute();
 
-        // Create procedure addCar and use it
+        // Create procedure addCar
         $sql2 = "CREATE PROCEDURE addCar(
             IN Brand VARCHAR(255),
             IN Model VARCHAR(255),
